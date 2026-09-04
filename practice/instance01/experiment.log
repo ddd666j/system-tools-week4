@@ -1,0 +1,16 @@
+before_exit=1
+unformatted: File would be reformatted
+ --> sample.py:1:11
+  |
+  - def add(a,b):
+  -  return a+b
+1 + def add(a, b):
+2 +     return a + b
+  |
+
+1 file would be reformatted
+--- formatted ---
+def add(a, b):
+    return a + b
+1 file already formatted
+format_gate=passed
