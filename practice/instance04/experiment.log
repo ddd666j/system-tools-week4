@@ -1,0 +1,8 @@
+rm -f upper.txt
+FIRST
+tr a-z A-Z < source.txt > upper.txt
+SECOND
+make: Nothing to be done for 'all'.
+AFTER_TOUCH
+tr a-z A-Z < source.txt > upper.txt
+ALPHA
