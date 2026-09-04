@@ -7,7 +7,7 @@
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,backgroundcolor=\color{codebg},showstringspaces=false}
 \pagestyle{fancy}\fancyhf{}\lhead{系统开发工具基础}\rhead{第四周实验报告}\cfoot{\thepage}
 \ctexset{section={format=\Large\bfseries\color{mainblue}}}\linespread{1.16}
-\newcommand{\screen}[2]{\begin{figure}[H]\centering\includegraphics[width=\textwidth,height=.61\textheight,keepaspectratio]{#1}\caption{#2}\end{figure}}
+\newcommand{\screen}[2]{\begin{figure}[H]\centering\includegraphics[width=\textwidth,height=.69\textheight,keepaspectratio]{#1}\caption{#2}\end{figure}}
 \newcommand{\pair}[4]{\begin{figure}[H]\centering\begin{minipage}{.485\textwidth}\includegraphics[width=\linewidth,height=.29\textheight,keepaspectratio]{#1}\caption*{#2}\end{minipage}\hfill\begin{minipage}{.485\textwidth}\includegraphics[width=\linewidth,height=.29\textheight,keepaspectratio]{#3}\caption*{#4}\end{minipage}\end{figure}}
 \begin{document}
 \begin{titlepage}\centering\vspace*{1.8cm}{\Large 计算机科学与技术学院\par}\vspace{1.3cm}{\Huge\bfseries 系统开发工具基础\par}\vspace{.4cm}{\LARGE\bfseries 第四周实验报告\par}\vspace{2cm}\renewcommand{\arraystretch}{1.7}\begin{tabular}{>{\bfseries}rl}学生姓名：&杜铭昊\\学号：&25020007021\\授课教师：&周小伟\\实验环境：&Ubuntu Linux虚拟机\\报告内容：&课堂第13--16题与10个扩展实例\\实验日期：&2026年9月14日\end{tabular}\vfill{\large 代码质量、Make构建、API处理与综合交付\par}\end{titlepage}
@@ -18,66 +18,74 @@
 
 \section{第13题：建立可执行的本地质量门禁}
 \subsection{实验原理}
-质量门禁把格式、静态检查和自动化测试组合为单一、可重复执行的入口。\texttt{ruff format --check}保证格式稳定，\texttt{ruff check}检测未使用导入和常见语法问题，pytest验证外部行为。脚本采用\texttt{set -euo pipefail}，任一环节失败都会产生非零退出码，从而阻止不合格代码进入后续构建。
+质量门禁把格式、静态检查和自动化测试组合为单一、可重复执行的入口。这三个层次分别回答“代码排版是否统一”“源码是否存在可静态识别的问题”“程序行为是否符合需求”。\texttt{ruff format --check}只检查格式而不修改文件；\texttt{ruff check}检测未使用导入、语法错误等问题；pytest通过断言验证正常输入和异常输入。检查脚本采用\texttt{set -euo pipefail}：任一命令返回非零状态，脚本立即停止并把失败传递给调用者，因此本地执行、Make和后续持续集成都能使用同一套通过标准。
 \subsection{步骤1：复制并配置项目}
-以第10题greetlab为基础建立q13，保留\texttt{src/greetlab}布局。在\texttt{pyproject.toml}中配置pytest测试目录、ruff行宽和E4、E7、E9、F规则，没有使用全局忽略。
+以第10题greetlab为基础建立q13，保留\texttt{src/greetlab}源码布局和\texttt{tests}测试目录。在\texttt{pyproject.toml}中配置pytest测试目录、ruff行宽以及E4、E7、E9、F规则，不使用全局忽略。这样工具从项目配置中读取规则，换一台机器进入项目后仍可按相同标准检查。
 \subsection{步骤2：补充行为测试}
-正常姓名测试将参数设为学号，并断言标准输出严格等于\texttt{Hello, 25020007021!}；空白姓名测试断言程序抛出\texttt{SystemExit}且退出码为2。两个测试都包含有效断言。
+正常姓名测试把命令行参数设为学号，调用入口函数后捕获标准输出，并严格断言为\texttt{Hello, 25020007021!}。异常测试传入只含空格的姓名，断言程序抛出\texttt{SystemExit}且退出码为2。前者验证主要功能，后者验证输入边界和错误契约，两个测试均包含可判定结果的断言。
 \screen{q13_01_config_tests.png}{第13题：项目配置与正常/空白姓名测试}
 \subsection{步骤3：格式化、检查与测试}
-依次运行ruff format、ruff check和pytest。结果为3个文件格式正确、静态检查全部通过、2个测试通过。
+先执行\texttt{ruff format .}统一现有代码格式，再依次运行\texttt{ruff format --check .}、\texttt{ruff check .}和\texttt{pytest -q}。实测结果为3个文件格式正确、静态检查全部通过、2个测试通过。把“自动修改格式”和“只检查格式”分开，可避免门禁在无人确认的情况下改写源码。
 \subsection{步骤4：编写统一检查入口}
-创建\texttt{check.sh}，依次执行格式只检查模式、静态检查和pytest。实际运行返回0，并输出\texttt{q13\_quality\_gate=passed}。
+创建可执行脚本\texttt{check.sh}，按“格式检查→静态检查→自动测试”的顺序调用三个工具，并只在全部成功后输出\texttt{q13\_quality\_gate=passed}。实际运行脚本返回码为0，说明整个质量门禁通过，而不是某一个工具单独通过。
 \screen{q13_02_quality_gate.png}{第13题：check.sh与质量门禁通过结果}
+\subsection{验收结果}
+\begin{center}\begin{tabular}{lll}\toprule 验收项 & 实测结果 & 判定\\\midrule 格式与静态检查 & 3个文件格式正确，ruff通过 & 通过\\行为测试 & 2 passed & 通过\\统一入口 & 退出码0并输出passed & 通过\\\bottomrule\end{tabular}\end{center}
 \subsection{结果与反思}
 本题所有门禁通过。单独执行工具容易遗漏步骤，统一脚本使开发者和持续集成环境执行同一份质量契约；不应通过全局忽略规则来“消除”错误，而应修复根因。
 \clearpage
 
 \section{第14题：让Make只重建真正受影响的产物}
 \subsection{实验原理}
-Make根据“目标、依赖和时间戳”决定是否执行配方。\texttt{stats.txt}依赖数据和统计脚本；\texttt{report.txt}依赖说明、统计中间产物和报告脚本。当上游数据变化时，依赖链应自动传递；无变化时应保持静默。\texttt{all}与\texttt{clean}不是文件，必须声明为\texttt{.PHONY}。
+Make把构建过程表示为有向依赖图，并比较目标与依赖文件的修改时间。若目标不存在，或任一依赖比目标新，就执行对应配方。本题的依赖链为“\texttt{data.csv + stats.py -> stats.txt}”以及“\texttt{report.md + stats.txt + build\_report.py -> report.txt}”。因此数据改变时先重算统计，再重新生成报告；所有输入不变时不应执行任何配方。\texttt{all}和\texttt{clean}表示动作而非真实文件，必须声明为\texttt{.PHONY}，避免同名文件导致命令被错误跳过。
 \subsection{步骤1：建立源文件}
 创建题目给定的\texttt{data.csv}、\texttt{stats.py}、\texttt{build\_report.py}和\texttt{report.md}。数据值2、3、5的合计应为10。
 \subsection{步骤2：编写准确Makefile}
 默认目标all依赖\texttt{report.txt}；统计目标依赖数据和统计脚本；报告目标依赖Markdown、统计结果和报告脚本；clean只删除两个生成物。由于系统默认Python无法解析题目中的f-string，Makefile明确指定\texttt{/home/dmh/.local/bin/python3.12}。
 \screen{q14_01_makefile.png}{第14题：Makefile依赖关系与处理脚本}
 \subsection{步骤3：验证首次构建和无操作构建}
-第一次make依次执行统计和报告配方，得到统计值10与报告文本；第二次无修改时输出\texttt{Nothing to be done for 'all'}，说明未做无效重建。
+第一次执行make时目标文件均不存在，Make依次运行统计和报告配方，得到总计10和最终报告。紧接着再次执行make，终端显示没有需要执行的任务，两个产物时间戳也没有变化，说明Make确实复用了已有结果。
 \subsection{步骤4：验证依赖传播与清理范围}
-执行\texttt{touch data.csv}后，stats和report按顺序重新生成，时间戳严格递增。执行clean后，数据、脚本和Markdown仍存在，只有生成物被删除。
+执行\texttt{touch data.csv}只更新上游数据时间戳，再次make时\texttt{stats.txt}先重建，随后依赖它的\texttt{report.txt}重建，两个时间戳严格递增。最后执行make clean，确认\texttt{stats.txt}和\texttt{report.txt}被删除，而CSV、Python脚本、Markdown源文件与Makefile仍保留。
 \screen{q14_02_incremental_result.png}{第14题：首次构建、无操作、touch重建和clean结果}
+\subsection{验收结果}
+\begin{center}\begin{tabular}{lll}\toprule 场景 & 预期行为 & 实测\\\midrule 首次make & 两级目标均生成 & 通过\\输入不变 & 不重复构建 & 通过\\touch数据 & 两级依赖依次重建 & 通过\\make clean & 只删除生成物 & 通过\\\bottomrule\end{tabular}\end{center}
 \subsection{结果与错误反思}
 增量构建验证通过。首次运行出现\texttt{SyntaxError}，根因是系统默认Python过旧而非Make依赖错误；修复方法是将解释器作为显式构建变量，避免“同名命令、不同运行时”导致不可复现。
 \clearpage
 
 \section{第15题：把本地API数据转换为可读报告}
 \subsection{实验原理}
-本题形成“HTTP获取--JSON过滤--排序--Markdown呈现”的流水线。curl的\texttt{-f}使HTTP错误返回非零，\texttt{-sS}减少正常噪声但保留错误；jq执行结构化过滤，避免用文本切割破坏JSON语义。排序键先使用downloads降序，再使用name升序解决并列。
+本题形成“HTTP获取→JSON校验→条件筛选→稳定排序→Markdown呈现”的数据流水线。curl的\texttt{-f}使HTTP 4xx/5xx转化为非零退出码，\texttt{-sS}隐藏进度条但保留错误信息；jq按JSON对象和字段操作，避免grep、awk等文本切割破坏结构。筛选条件是\texttt{status == active}且下载量不少于100；排序时先按downloads降序，再按name升序处理并列，从而保证结果稳定、可复现。
 \subsection{步骤1：启动本地服务并获取数据}
-保存5条软件包JSON，在q15目录运行\texttt{python3 -m http.server 8000}。用curl访问本机地址，jq读取数组长度为5，证明服务和JSON均有效。
+保存包含5条软件包记录的JSON，在q15目录启动仅供本机实验使用的HTTP服务。脚本记录服务进程号，并通过trap保证退出时终止服务、删除临时响应文件。随后curl访问\texttt{127.0.0.1:8000}，jq读取数组长度为5；这一步同时验证了端口、URL、HTTP响应和JSON语法。
 \subsection{步骤2：筛选与排序}
-筛选status为active且downloads不少于100的记录，得到delta、gamma、alpha。delta与gamma下载量同为450，按name升序时delta在前，符合双键排序要求。
+将HTTP响应交给jq，先选择status为active且downloads不少于100的对象，再构造仅含name、version、downloads的输出。排序结果为delta、gamma、alpha；其中delta与gamma下载量均为450，二级键name升序使delta排在gamma之前，alpha以120排在最后。
 \screen{q15_01_api_pipeline.png}{第15题：curl、jq与Markdown生成脚本}
 \subsection{步骤3：生成summary.md}
-\texttt{api\_report.sh}使用临时文件保存响应，并通过trap清理；输出标题及name、version、downloads三列表格。最终表中依次为delta 0.9.0 450、gamma 1.5.1 450、alpha 1.2.0 120。
+\texttt{api\_report.sh}先写入Markdown标题和表头，再把jq生成的三列数据逐行转换为表格。最终\texttt{summary.md}依次包含delta 0.9.0 450、gamma 1.5.1 450、alpha 1.2.0 120。最后检查文件内容和脚本退出码，确认生成物完整且流水线成功结束。
 \screen{q15_02_summary_result.png}{第15题：过滤排序结果与summary.md}
+\subsection{验收结果}
+\begin{center}\begin{tabular}{lll}\toprule 验收项 & 实测结果 & 判定\\\midrule HTTP与JSON & 数组长度5 & 通过\\过滤 & 保留3条合格记录 & 通过\\排序 & delta、gamma、alpha & 通过\\报告 & Markdown三列表格 & 通过\\\bottomrule\end{tabular}\end{center}
 \subsection{结果与错误反思}
 API报告生成通过。虚拟机最初缺少curl和jq，且无无密码sudo权限；因此从Ubuntu官方软件源下载相应软件包并仅解压到用户目录，未改变系统级配置。脚本显式设置工具路径和jq动态库路径，保证他人可以理解运行环境。
 \clearpage
 
 \section{第16题：修复并交付陌生的小型工具仓库}
 \subsection{实验原理}
-综合交付要求先用测试捕获回归，再完成最小修复，并通过统一入口产生可校验制品。Makefile把check作为build的前置条件，从结构上保证“不通过检查就不构建”；wheel的SHA-256摘要用于识别交付制品。
+综合交付遵循“复现缺陷→用测试固定现象→最小修复→全量回归→构建制品→计算摘要”的闭环。测试失败是修复前的重要基线，只有同一测试在修复后转为通过，才能证明修改针对了真实问题。Makefile把check设为build的前置条件，从依赖结构上保证“不通过检查就不构建”。wheel是可安装的Python分发制品，SHA-256摘要把文件内容映射为固定指纹，可用于传输后的完整性校验。
 \subsection{步骤1：制造并确认真实功能失败}
-复制q13为q16，把问候函数临时改为始终返回字面量\texttt{Hello, name!}。先格式化故障代码，避免格式门禁提前终止；随后运行check，ruff通过但两个pytest失败：真实姓名输出错误，空白姓名没有抛出异常，退出码为1。
+复制q13为q16并先阅读项目结构、入口函数、测试和配置。为验证测试确实能够发现功能回归，把问候函数临时改为始终返回字面量\texttt{Hello, name!}。先格式化这份故障代码，使格式门禁通过，再执行统一检查。结果ruff通过而pytest明确报告2项失败：真实姓名未被代入，空白姓名也未抛出预期异常；总退出码为1。由此确认测试覆盖了题目关心的两类行为。
 \subsection{步骤2：定位并实施最小修复}
-恢复基于参数构造问候语的实现，并在空白输入时抛出\texttt{ValueError}，CLI将其转换为参数错误。没有引入无关重构。
+根据失败断言定位到问候函数，而不是修改测试来迎合错误实现。修复时先去除输入两端空白；若结果为空则抛出\texttt{ValueError}，CLI捕获后转换为参数错误；否则用清洗后的真实参数构造问候语。修改范围只涉及缺陷路径，没有更名、重排目录或进行无关重构，降低了引入新回归的风险。
 \screen{q16_01_failure_fix.png}{第16题：故意回归、测试失败与最终实现}
 \subsection{步骤3：建立Make交付入口}
-Makefile包含check、build、clean三个伪目标。check调用\texttt{check.sh}；build依赖check，清理旧产物后以Python 3.12调用build生成wheel；clean删除构建缓存和制品。
+Makefile包含check、build、clean三个伪目标。check调用统一质量脚本；build显式依赖check，只有格式、静态检查和测试全部通过后，才清理旧制品并用Python 3.12调用build模块；clean只移除\texttt{build}、\texttt{dist}和元数据目录。这样质量验证、构建与清理都具有明确入口和退出状态。
 \subsection{步骤4：检查、构建与摘要}
-\texttt{make check}得到ruff通过和2个测试通过；\texttt{make build}成功生成\texttt{greetlab\_25020007021-0.3.0-py3-none-any.whl}，随后计算并保存SHA-256。
+先执行\texttt{make check}，得到格式检查通过、ruff通过和2个测试通过；再执行\texttt{make build}，它会再次经过check前置条件并成功生成0.3.0版wheel。随后对唯一的wheel计算SHA-256并保存摘要，最后核对文件名、文件存在性和摘要输出，形成可追溯的交付证据。
 \screen{q16_02_release_result.png}{第16题：质量检查、wheel构建与SHA-256结果}
+\subsection{验收结果}
+\begin{center}\begin{tabular}{lll}\toprule 阶段 & 关键证据 & 判定\\\midrule 修复前 & 2项功能测试失败，退出码1 & 缺陷已复现\\修复后 & ruff通过，2 passed & 回归通过\\构建 & wheel生成成功 & 通过\\完整性 & SHA-256摘要已保存 & 通过\\\bottomrule\end{tabular}\end{center}
 \subsection{结果与错误反思}
 综合交付链通过。最初的故障演示被格式检查提前拦截，无法证明测试确实捕获功能缺陷；调整为先格式化故障代码后再执行check，最终观察到两个真实功能测试失败。说明验证实验时必须确保失败来自目标缺陷，而不是更早的无关门禁。
 \clearpage
