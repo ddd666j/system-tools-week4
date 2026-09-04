@@ -1,0 +1,24 @@
+WEEK 4 COMMIT RECORD - 实例05-06
+ef775de 完成第四周扩展实例5和实例6
+ practice/instance05/Makefile                           |   6 ++++++
+ practice/instance05/README.md                          |   3 +++
+ practice/instance05/data.txt                           |   3 +++
+ practice/instance05/experiment.log                     |  10 ++++++++++
+ practice/instance05/report.txt                         |   2 ++
+ practice/instance05/run_experiment.sh                  |  12 ++++++++++++
+ .../instance05/screenshots/instance05_01_process.png   | Bin 0 -> 127074 bytes
+ .../instance05/screenshots/instance05_02_result.png    | Bin 0 -> 102687 bytes
+ practice/instance05/stats.txt                          |   1 +
+ practice/instance05/title.txt                          |   1 +
+ practice/instance06/Makefile                           |   8 ++++++++
+ practice/instance06/README.md                          |   3 +++
+ practice/instance06/a.out                              |   1 +
+ practice/instance06/b.out                              |   1 +
+ practice/instance06/experiment.log                     |   7 +++++++
+ practice/instance06/run_experiment.sh                  |  13 +++++++++++++
+ .../instance06/screenshots/instance06_01_process.png   | Bin 0 -> 127220 bytes
+ .../instance06/screenshots/instance06_02_result.png    | Bin 0 -> 95544 bytes
+ 18 files changed, 71 insertions(+)
+
+origin	https://github.com/ddd666j/system-tools-week4.git (fetch)
+origin	https://github.com/ddd666j/system-tools-week4.git (push)

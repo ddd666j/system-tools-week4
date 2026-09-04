@@ -1,0 +1,19 @@
+WEEK 4 COMMIT RECORD - 实例07-08
+073fe9c 完成第四周扩展实例7和实例8
+ practice/instance07/README.md                          |   3 +++
+ practice/instance07/data.json                          |   1 +
+ practice/instance07/experiment.log                     |   5 +++++
+ practice/instance07/run_experiment.sh                  |   6 ++++++
+ .../instance07/screenshots/instance07_01_process.png   | Bin 0 -> 127902 bytes
+ .../instance07/screenshots/instance07_02_result.png    | Bin 0 -> 96593 bytes
+ practice/instance07/server.log                         |   0
+ practice/instance08/README.md                          |   3 +++
+ practice/instance08/experiment.log                     |   5 +++++
+ practice/instance08/packages.json                      |   1 +
+ practice/instance08/run_experiment.sh                  |   8 ++++++++
+ .../instance08/screenshots/instance08_01_process.png   | Bin 0 -> 131044 bytes
+ .../instance08/screenshots/instance08_02_result.png    | Bin 0 -> 91581 bytes
+ 13 files changed, 32 insertions(+)
+
+origin	https://github.com/ddd666j/system-tools-week4.git (fetch)
+origin	https://github.com/ddd666j/system-tools-week4.git (push)

@@ -1,0 +1,21 @@
+WEEK 4 COMMIT RECORD - 实例01-02
+065841b 完成第四周扩展实例1和实例2
+ practice/instance01/README.md                      |   3 +++
+ practice/instance01/after.txt                      |   1 +
+ practice/instance01/before.txt                     |  10 ++++++++++
+ practice/instance01/experiment.log                 |  16 +++++++++++++++
+ practice/instance01/run_experiment.sh              |   7 +++++++
+ practice/instance01/sample.py                      |   2 ++
+ .../screenshots/instance01_01_process.png          | Bin 0 -> 128919 bytes
+ .../screenshots/instance01_02_result.png           | Bin 0 -> 109194 bytes
+ practice/instance02/README.md                      |   3 +++
+ practice/instance02/app.py                         |   2 ++
+ practice/instance02/before.txt                     |  16 +++++++++++++++
+ practice/instance02/experiment.log                 |  22 +++++++++++++++++++++
+ practice/instance02/run_experiment.sh              |   7 +++++++
+ .../screenshots/instance02_01_process.png          | Bin 0 -> 126991 bytes
+ .../screenshots/instance02_02_result.png           | Bin 0 -> 112691 bytes
+ 15 files changed, 89 insertions(+)
+
+origin	https://github.com/ddd666j/system-tools-week4.git (fetch)
+origin	https://github.com/ddd666j/system-tools-week4.git (push)

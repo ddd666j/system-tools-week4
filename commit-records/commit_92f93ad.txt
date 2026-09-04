@@ -1,0 +1,24 @@
+WEEK 4 COMMIT RECORD - 课堂题13-14
+92f93ad 完成第四周课堂题13和14
+ q13/check.sh                                  |   8 ++++++++
+ q13/experiment.log                            |  13 +++++++++++++
+ q13/pyproject.toml                            |  14 ++++++++++++++
+ q13/run_experiment.sh                         |  12 ++++++++++++
+ q13/screenshots/q13_01_config_tests.png       | Bin 0 -> 155328 bytes
+ q13/screenshots/q13_02_quality_gate.png       | Bin 0 -> 139637 bytes
+ q13/src/greetlab/__init__.py                  |   1 +
+ q13/src/greetlab/cli.py                       |  14 ++++++++++++++
+ q13/tests/test_cli.py                         |  18 ++++++++++++++++++
+ q14/Makefile                                  |   9 +++++++++
+ q14/build_report.py                           |   3 +++
+ q14/data.csv                                  |   4 ++++
+ q14/experiment.log                            |  20 ++++++++++++++++++++
+ q14/report.md                                 |   1 +
+ q14/run_experiment.sh                         |  11 +++++++++++
+ q14/screenshots/q14_01_makefile.png           | Bin 0 -> 133884 bytes
+ q14/screenshots/q14_02_incremental_result.png | Bin 0 -> 143408 bytes
+ q14/stats.py                                  |   6 ++++++
+ 18 files changed, 134 insertions(+)
+
+origin	https://github.com/ddd666j/system-tools-week4.git (fetch)
+origin	https://github.com/ddd666j/system-tools-week4.git (push)

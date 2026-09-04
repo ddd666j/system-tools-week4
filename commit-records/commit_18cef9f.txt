@@ -1,0 +1,26 @@
+WEEK 4 COMMIT RECORD - 课堂题15-16
+18cef9f 完成第四周课堂题15和16
+ q15/api_report.sh                                  |  16 ++++
+ q15/experiment.log                                 |  15 ++++
+ q15/packages.json                                  |   7 ++
+ q15/run_experiment.sh                              |  15 ++++
+ q15/screenshots/q15_01_api_pipeline.png            | Bin 0 -> 154944 bytes
+ q15/screenshots/q15_02_summary_result.png          | Bin 0 -> 122378 bytes
+ q15/server.log                                     |   0
+ q15/summary.md                                     |   7 ++
+ q16/Makefile                                       |   8 ++
+ q16/check.sh                                       |   6 ++
+ .../greetlab_25020007021-0.3.0-py3-none-any.whl    | Bin 0 -> 1902 bytes
+ q16/experiment.log                                 |  90 +++++++++++++++++++++
+ q16/failure.log                                    |  26 ++++++
+ q16/pyproject.toml                                 |  14 ++++
+ q16/run_experiment.sh                              |  18 +++++
+ q16/screenshots/q16_01_failure_fix.png             | Bin 0 -> 175525 bytes
+ q16/screenshots/q16_02_release_result.png          | Bin 0 -> 217794 bytes
+ q16/src/greetlab/__init__.py                       |   1 +
+ q16/src/greetlab/cli.py                            |  17 ++++
+ q16/tests/test_cli.py                              |  12 +++
+ 20 files changed, 252 insertions(+)
+
+origin	https://github.com/ddd666j/system-tools-week4.git (fetch)
+origin	https://github.com/ddd666j/system-tools-week4.git (push)
