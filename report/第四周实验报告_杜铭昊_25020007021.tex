@@ -121,7 +121,7 @@ Makefile包含check、build、clean三个伪目标。check调用统一质量脚�
 \pair{instance08_01_process.png}{实例8：jq聚合命令}{instance08_02_result.png}{实例8：JSON统计结果}
 \clearpage
 \subsection{实例9：CLI JSON输出契约}
-CLI同时支持文本与JSON输出；使用jq断言学号和消息字段，返回true并显示\texttt{cli\_json\_contract=passed}。首次使用系统默认Python出现f-string语法错误，改为Python 3.12后通过。
+CLI同时支持文本与JSON输出；使用jq断言学号和消息字段，返回true并显示契约检查通过。首次使用系统默认Python出现f-string语法错误，改为Python 3.12后通过。
 \pair{instance09_01_process.png}{实例9：CLI脚本}{instance09_02_result.png}{实例9：jq契约通过}
 \subsection{实例10：完整发布流水线}
 复用q16项目，依次执行质量检查、wheel构建和摘要计算；2个测试、ruff及构建全部通过，最终输出\texttt{release\_pipeline=passed}。
