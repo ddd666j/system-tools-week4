@@ -1,0 +1,7 @@
+rm -f a.out b.out
+sleep 1; echo A > a.out
+sleep 1; echo B > b.out
+elapsed_seconds=1
+A
+B
+parallel_make=passed

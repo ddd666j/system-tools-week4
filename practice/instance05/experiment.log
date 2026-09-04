@@ -1,0 +1,10 @@
+=== dry run ===
+wc -l data.txt > stats.txt
+cat title.txt stats.txt > report.txt
+=== build ===
+wc -l data.txt > stats.txt
+cat title.txt stats.txt > report.txt
+=== up to date ===
+make: Nothing to be done for 'all'.
+REPORT
+3 data.txt
