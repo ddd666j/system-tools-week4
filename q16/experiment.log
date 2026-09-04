@@ -1,0 +1,90 @@
+=== Q16 STEP 1: intentional regression ===
+6 files already formatted
+All checks passed!
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________________________ test_real_name ________________________________
+
+    def test_real_name():
+>       assert greeting("25020007021") == "Hello, 25020007021!"
+E       AssertionError: assert 'Hello, name!' == 'Hello, 25020007021!'
+E         
+E         - Hello, 25020007021!
+E         + Hello, name!
+
+tests/test_cli.py:7: AssertionError
+_______________________________ test_blank_name ________________________________
+
+    def test_blank_name():
+>       with pytest.raises(ValueError, match="must not be blank"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_cli.py:11: Failed
+=========================== short test summary info ============================
+FAILED tests/test_cli.py::test_real_name - AssertionError: assert 'Hello, nam...
+FAILED tests/test_cli.py::test_blank_name - Failed: DID NOT RAISE ValueError
+2 failed in 0.01s
+failing_gate_exit=1
+=== Q16 STEP 2: restore minimal fix and check ===
+./check.sh
+5 files already formatted
+All checks passed!
+..                                                                       [100%]
+2 passed in 0.00s
+=== Q16 STEP 3: build wheel ===
+./check.sh
+5 files already formatted
+All checks passed!
+..                                                                       [100%]
+2 passed in 0.00s
+rm -rf dist build *.egg-info src/*.egg-info
+/home/dmh/桌面/system-tools-week3/.venv-dev/bin/python -m build --no-isolation --wheel
+* Getting build dependencies for wheel...
+running egg_info
+creating src/greetlab_25020007021.egg-info
+writing src/greetlab_25020007021.egg-info/PKG-INFO
+writing dependency_links to src/greetlab_25020007021.egg-info/dependency_links.txt
+writing entry points to src/greetlab_25020007021.egg-info/entry_points.txt
+writing top-level names to src/greetlab_25020007021.egg-info/top_level.txt
+writing manifest file 'src/greetlab_25020007021.egg-info/SOURCES.txt'
+reading manifest file 'src/greetlab_25020007021.egg-info/SOURCES.txt'
+writing manifest file 'src/greetlab_25020007021.egg-info/SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build/lib/greetlab
+copying src/greetlab/cli.py -> build/lib/greetlab
+copying src/greetlab/__init__.py -> build/lib/greetlab
+running egg_info
+writing src/greetlab_25020007021.egg-info/PKG-INFO
+writing dependency_links to src/greetlab_25020007021.egg-info/dependency_links.txt
+writing entry points to src/greetlab_25020007021.egg-info/entry_points.txt
+writing top-level names to src/greetlab_25020007021.egg-info/top_level.txt
+reading manifest file 'src/greetlab_25020007021.egg-info/SOURCES.txt'
+writing manifest file 'src/greetlab_25020007021.egg-info/SOURCES.txt'
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/greetlab
+copying build/lib/greetlab/cli.py -> build/bdist.linux-x86_64/wheel/./greetlab
+copying build/lib/greetlab/__init__.py -> build/bdist.linux-x86_64/wheel/./greetlab
+running install_egg_info
+Copying src/greetlab_25020007021.egg-info to build/bdist.linux-x86_64/wheel/./greetlab_25020007021-0.3.0-py3.12.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/greetlab_25020007021-0.3.0.dist-info/WHEEL
+creating '/home/dmh/桌面/system-tools-week4/q16/dist/.tmp-9ajrppia/greetlab_25020007021-0.3.0-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'greetlab/__init__.py'
+adding 'greetlab/cli.py'
+adding 'greetlab_25020007021-0.3.0.dist-info/METADATA'
+adding 'greetlab_25020007021-0.3.0.dist-info/WHEEL'
+adding 'greetlab_25020007021-0.3.0.dist-info/entry_points.txt'
+adding 'greetlab_25020007021-0.3.0.dist-info/top_level.txt'
+adding 'greetlab_25020007021-0.3.0.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+Successfully built greetlab_25020007021-0.3.0-py3-none-any.whl
+=== Q16 STEP 4: SHA-256 ===
+6ae49c9ace01deafda619907dad7fd1c4e75df22abdbc98f00b4bef7f754763e  dist/greetlab_25020007021-0.3.0-py3-none-any.whl
+q16_release_delivery=passed

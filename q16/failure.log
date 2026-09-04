@@ -1,0 +1,26 @@
+6 files already formatted
+All checks passed!
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________________________ test_real_name ________________________________
+
+    def test_real_name():
+>       assert greeting("25020007021") == "Hello, 25020007021!"
+E       AssertionError: assert 'Hello, name!' == 'Hello, 25020007021!'
+E         
+E         - Hello, 25020007021!
+E         + Hello, name!
+
+tests/test_cli.py:7: AssertionError
+_______________________________ test_blank_name ________________________________
+
+    def test_blank_name():
+>       with pytest.raises(ValueError, match="must not be blank"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_cli.py:11: Failed
+=========================== short test summary info ============================
+FAILED tests/test_cli.py::test_real_name - AssertionError: assert 'Hello, nam...
+FAILED tests/test_cli.py::test_blank_name - Failed: DID NOT RAISE ValueError
+2 failed in 0.01s
