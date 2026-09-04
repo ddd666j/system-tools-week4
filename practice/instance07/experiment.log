@@ -1,0 +1,5 @@
+{"ok":true,"student":"25020007021"}
+
+curl: (22) The requested URL returned error: 404 File not found
+missing_exit=22
+curl_error_contract=passed
