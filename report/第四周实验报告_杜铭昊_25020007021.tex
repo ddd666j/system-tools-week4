@@ -1,0 +1,132 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+\usepackage[margin=2.1cm,headheight=15pt]{geometry}
+\usepackage{graphicx,float,booktabs,tabularx,array,xcolor,listings,fancyhdr,hyperref,caption}
+\graphicspath{{assets/}}
+\definecolor{mainblue}{HTML}{174A7E}\definecolor{codebg}{HTML}{F4F6F8}
+\hypersetup{colorlinks=true,linkcolor=mainblue,urlcolor=mainblue}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,backgroundcolor=\color{codebg},showstringspaces=false}
+\pagestyle{fancy}\fancyhf{}\lhead{系统开发工具基础}\rhead{第四周实验报告}\cfoot{\thepage}
+\ctexset{section={format=\Large\bfseries\color{mainblue}}}\linespread{1.16}
+\newcommand{\screen}[2]{\begin{figure}[H]\centering\includegraphics[width=\textwidth,height=.61\textheight,keepaspectratio]{#1}\caption{#2}\end{figure}}
+\newcommand{\pair}[4]{\begin{figure}[H]\centering\begin{minipage}{.485\textwidth}\includegraphics[width=\linewidth,height=.29\textheight,keepaspectratio]{#1}\caption*{#2}\end{minipage}\hfill\begin{minipage}{.485\textwidth}\includegraphics[width=\linewidth,height=.29\textheight,keepaspectratio]{#3}\caption*{#4}\end{minipage}\end{figure}}
+\begin{document}
+\begin{titlepage}\centering\vspace*{1.8cm}{\Large 计算机科学与技术学院\par}\vspace{1.3cm}{\Huge\bfseries 系统开发工具基础\par}\vspace{.4cm}{\LARGE\bfseries 第四周实验报告\par}\vspace{2cm}\renewcommand{\arraystretch}{1.7}\begin{tabular}{>{\bfseries}rl}学生姓名：&杜铭昊\\学号：&25020007021\\授课教师：&周小伟\\实验环境：&Ubuntu Linux虚拟机\\报告内容：&课堂第13--16题与10个扩展实例\\实验日期：&2026年9月14日\end{tabular}\vfill{\large 代码质量、Make构建、API处理与综合交付\par}\end{titlepage}
+\tableofcontents\clearpage
+
+\section{实验环境与证据规范}
+实验在Ubuntu虚拟机中实测，Windows用于文件同步和GitHub推送。主要工具包括Python 3.12、ruff 0.16.5、pytest、GNU Make、curl、jq、build、Git和SHA-256工具。虚拟机系统默认Python版本较旧，因此涉及f-string的步骤显式使用课程Python 3.12。所有题目均保存源码、运行脚本、结果日志和Linux桌面截图；扩展实例每两个形成一次独立提交。
+
+\section{第13题：建立可执行的本地质量门禁}
+\subsection{实验原理}
+质量门禁把格式、静态检查和自动化测试组合为单一、可重复执行的入口。\texttt{ruff format --check}保证格式稳定，\texttt{ruff check}检测未使用导入和常见语法问题，pytest验证外部行为。脚本采用\texttt{set -euo pipefail}，任一环节失败都会产生非零退出码，从而阻止不合格代码进入后续构建。
+\subsection{步骤1：复制并配置项目}
+以第10题greetlab为基础建立q13，保留\texttt{src/greetlab}布局。在\texttt{pyproject.toml}中配置pytest测试目录、ruff行宽和E4、E7、E9、F规则，没有使用全局忽略。
+\subsection{步骤2：补充行为测试}
+正常姓名测试将参数设为学号，并断言标准输出严格等于\texttt{Hello, 25020007021!}；空白姓名测试断言程序抛出\texttt{SystemExit}且退出码为2。两个测试都包含有效断言。
+\screen{q13_01_config_tests.png}{第13题：项目配置与正常/空白姓名测试}
+\subsection{步骤3：格式化、检查与测试}
+依次运行ruff format、ruff check和pytest。结果为3个文件格式正确、静态检查全部通过、2个测试通过。
+\subsection{步骤4：编写统一检查入口}
+创建\texttt{check.sh}，依次执行格式只检查模式、静态检查和pytest。实际运行返回0，并输出\texttt{q13\_quality\_gate=passed}。
+\screen{q13_02_quality_gate.png}{第13题：check.sh与质量门禁通过结果}
+\subsection{结果与反思}
+本题所有门禁通过。单独执行工具容易遗漏步骤，统一脚本使开发者和持续集成环境执行同一份质量契约；不应通过全局忽略规则来“消除”错误，而应修复根因。
+\clearpage
+
+\section{第14题：让Make只重建真正受影响的产物}
+\subsection{实验原理}
+Make根据“目标、依赖和时间戳”决定是否执行配方。\texttt{stats.txt}依赖数据和统计脚本；\texttt{report.txt}依赖说明、统计中间产物和报告脚本。当上游数据变化时，依赖链应自动传递；无变化时应保持静默。\texttt{all}与\texttt{clean}不是文件，必须声明为\texttt{.PHONY}。
+\subsection{步骤1：建立源文件}
+创建题目给定的\texttt{data.csv}、\texttt{stats.py}、\texttt{build\_report.py}和\texttt{report.md}。数据值2、3、5的合计应为10。
+\subsection{步骤2：编写准确Makefile}
+默认目标all依赖\texttt{report.txt}；统计目标依赖数据和统计脚本；报告目标依赖Markdown、统计结果和报告脚本；clean只删除两个生成物。由于系统默认Python无法解析题目中的f-string，Makefile明确指定\texttt{/home/dmh/.local/bin/python3.12}。
+\screen{q14_01_makefile.png}{第14题：Makefile依赖关系与处理脚本}
+\subsection{步骤3：验证首次构建和无操作构建}
+第一次make依次执行统计和报告配方，得到统计值10与报告文本；第二次无修改时输出\texttt{Nothing to be done for 'all'}，说明未做无效重建。
+\subsection{步骤4：验证依赖传播与清理范围}
+执行\texttt{touch data.csv}后，stats和report按顺序重新生成，时间戳严格递增。执行clean后，数据、脚本和Markdown仍存在，只有生成物被删除。
+\screen{q14_02_incremental_result.png}{第14题：首次构建、无操作、touch重建和clean结果}
+\subsection{结果与错误反思}
+增量构建验证通过。首次运行出现\texttt{SyntaxError}，根因是系统默认Python过旧而非Make依赖错误；修复方法是将解释器作为显式构建变量，避免“同名命令、不同运行时”导致不可复现。
+\clearpage
+
+\section{第15题：把本地API数据转换为可读报告}
+\subsection{实验原理}
+本题形成“HTTP获取--JSON过滤--排序--Markdown呈现”的流水线。curl的\texttt{-f}使HTTP错误返回非零，\texttt{-sS}减少正常噪声但保留错误；jq执行结构化过滤，避免用文本切割破坏JSON语义。排序键先使用downloads降序，再使用name升序解决并列。
+\subsection{步骤1：启动本地服务并获取数据}
+保存5条软件包JSON，在q15目录运行\texttt{python3 -m http.server 8000}。用curl访问本机地址，jq读取数组长度为5，证明服务和JSON均有效。
+\subsection{步骤2：筛选与排序}
+筛选status为active且downloads不少于100的记录，得到delta、gamma、alpha。delta与gamma下载量同为450，按name升序时delta在前，符合双键排序要求。
+\screen{q15_01_api_pipeline.png}{第15题：curl、jq与Markdown生成脚本}
+\subsection{步骤3：生成summary.md}
+\texttt{api\_report.sh}使用临时文件保存响应，并通过trap清理；输出标题及name、version、downloads三列表格。最终表中依次为delta 0.9.0 450、gamma 1.5.1 450、alpha 1.2.0 120。
+\screen{q15_02_summary_result.png}{第15题：过滤排序结果与summary.md}
+\subsection{结果与错误反思}
+API报告生成通过。虚拟机最初缺少curl和jq，且无无密码sudo权限；因此从Ubuntu官方软件源下载相应软件包并仅解压到用户目录，未改变系统级配置。脚本显式设置工具路径和jq动态库路径，保证他人可以理解运行环境。
+\clearpage
+
+\section{第16题：修复并交付陌生的小型工具仓库}
+\subsection{实验原理}
+综合交付要求先用测试捕获回归，再完成最小修复，并通过统一入口产生可校验制品。Makefile把check作为build的前置条件，从结构上保证“不通过检查就不构建”；wheel的SHA-256摘要用于识别交付制品。
+\subsection{步骤1：制造并确认真实功能失败}
+复制q13为q16，把问候函数临时改为始终返回字面量\texttt{Hello, name!}。先格式化故障代码，避免格式门禁提前终止；随后运行check，ruff通过但两个pytest失败：真实姓名输出错误，空白姓名没有抛出异常，退出码为1。
+\subsection{步骤2：定位并实施最小修复}
+恢复基于参数构造问候语的实现，并在空白输入时抛出\texttt{ValueError}，CLI将其转换为参数错误。没有引入无关重构。
+\screen{q16_01_failure_fix.png}{第16题：故意回归、测试失败与最终实现}
+\subsection{步骤3：建立Make交付入口}
+Makefile包含check、build、clean三个伪目标。check调用\texttt{check.sh}；build依赖check，清理旧产物后以Python 3.12调用build生成wheel；clean删除构建缓存和制品。
+\subsection{步骤4：检查、构建与摘要}
+\texttt{make check}得到ruff通过和2个测试通过；\texttt{make build}成功生成\texttt{greetlab\_25020007021-0.3.0-py3-none-any.whl}，随后计算并保存SHA-256。
+\screen{q16_02_release_result.png}{第16题：质量检查、wheel构建与SHA-256结果}
+\subsection{结果与错误反思}
+综合交付链通过。最初的故障演示被格式检查提前拦截，无法证明测试确实捕获功能缺陷；调整为先格式化故障代码后再执行check，最终观察到两个真实功能测试失败。说明验证实验时必须确保失败来自目标缺陷，而不是更早的无关门禁。
+\clearpage
+
+\section{第四周扩展实例1--10}
+扩展实例围绕代码质量、自动测试、Make依赖、并行构建、HTTP错误契约、jq统计和发布流水线设计。每个实例均在Ubuntu执行，并保存脚本与结果截图。
+\subsection{实例1：ruff格式门禁}
+故意创建缩进和逗号格式不规范的函数，\texttt{ruff format --check}先返回1并显示差异；执行格式化后再次检查通过。原理是把代码风格转换为可执行约束。
+\pair{instance01_01_process.png}{实例1：脚本与步骤}{instance01_02_result.png}{实例1：失败、修复和通过}
+\subsection{实例2：静态检查自动修复}
+在程序中加入未使用的\texttt{import os}，ruff报告F401并返回1；使用安全修复删除导入，最终\texttt{All checks passed}。
+\pair{instance02_01_process.png}{实例2：静态检查脚本}{instance02_02_result.png}{实例2：F401与修复结果}
+\clearpage
+\subsection{实例3：参数化测试}
+实现姓名去空格与空值拒绝，通过pytest参数化覆盖2个正常输入和3个异常输入，最终5个测试全部通过。参数化可在不复制测试结构的情况下扩展边界覆盖。
+\pair{instance03_01_process.png}{实例3：参数化测试过程}{instance03_02_result.png}{实例3：5项测试通过}
+\subsection{实例4：最小Make增量构建}
+首次生成大写文件，第二次make不执行配方；touch源文件后目标重新生成并得到ALPHA，证明时间戳依赖生效。
+\pair{instance04_01_process.png}{实例4：Makefile与步骤}{instance04_02_result.png}{实例4：增量构建结果}
+\clearpage
+\subsection{实例5：Make干运行与依赖链}
+使用\texttt{make -n}预览两条配方，正式构建后再次干运行显示无任务；报告正确包含标题和3行统计结果。干运行适合在不改动文件时审计构建计划。
+\pair{instance05_01_process.png}{实例5：依赖链脚本}{instance05_02_result.png}{实例5：干运行和产物}
+\subsection{实例6：并行Make}
+两个互不依赖目标各等待1秒，\texttt{make -j2}并行执行，总耗时约1秒且生成A、B两个文件，说明依赖图也决定可并行程度。
+\pair{instance06_01_process.png}{实例6：并行目标}{instance06_02_result.png}{实例6：并行结果}
+\clearpage
+\subsection{实例7：curl错误退出契约}
+本地服务正常资源返回JSON；不存在资源因\texttt{-f}得到HTTP 404和退出码22，脚本断言其非零。网络脚本不仅要验证成功路径，也要让错误可被上层自动识别。
+\pair{instance07_01_process.png}{实例7：HTTP测试脚本}{instance07_02_result.png}{实例7：正常响应与404退出码}
+\subsection{实例8：jq聚合统计}
+对JSON一次性计算活动记录数2、活动下载总数40和总体下载最高项b。结构化聚合避免多次解析或手工统计。
+\pair{instance08_01_process.png}{实例8：jq聚合命令}{instance08_02_result.png}{实例8：JSON统计结果}
+\clearpage
+\subsection{实例9：CLI JSON输出契约}
+CLI同时支持文本与JSON输出；使用jq断言学号和消息字段，返回true并显示\texttt{cli\_json\_contract=passed}。首次使用系统默认Python出现f-string语法错误，改为Python 3.12后通过。
+\pair{instance09_01_process.png}{实例9：CLI脚本}{instance09_02_result.png}{实例9：jq契约通过}
+\subsection{实例10：完整发布流水线}
+复用q16项目，依次执行质量检查、wheel构建和摘要计算；2个测试、ruff及构建全部通过，最终输出\texttt{release\_pipeline=passed}。
+\pair{instance10_01_process.png}{实例10：发布流水线}{instance10_02_result.png}{实例10：检查、构建与摘要}
+\clearpage
+
+\section{GitHub分阶段提交记录}
+仓库地址为\url{https://github.com/ddd666j/system-tools-week4}。课堂题13--14、15--16分别提交；扩展实例每两个一次提交，最后单独提交记录文件。主要提交为\texttt{92f93ad}、\texttt{18cef9f}、\texttt{065841b}、\texttt{8c994fd}、\texttt{ef775de}、\texttt{073fe9c}、\texttt{0de0300}和\texttt{1c33c63}。
+\pair{commit_92f93ad_windows.png}{课堂题13--14提交}{commit_18cef9f_windows.png}{课堂题15--16提交}
+\pair{commit_065841b_windows.png}{实例1--2提交}{commit_8c994fd_windows.png}{实例3--4提交}
+\pair{commit_ef775de_windows.png}{实例5--6提交}{commit_073fe9c_windows.png}{实例7--8提交}
+\pair{commit_0de0300_windows.png}{实例9--10提交}{commit_a07a619_windows.png}{仓库初始化与完整历史}
+
+\section{综合结论}
+本周完成了从代码质量、自动测试到增量构建、API数据处理和wheel交付的完整工具链。实验中遇到的主要问题是默认Python版本不兼容、虚拟机缺少curl和jq、功能失败被格式门禁提前遮蔽。解决原则是保留失败证据、定位实际失败层级、显式固定运行时与工具路径，并用最小修改重新验证。最终所有课堂题和10个扩展实例均在Linux实测通过，源码、日志、截图和Git历史已同步到Windows与公开GitHub仓库。
+\end{document}
