@@ -1,0 +1,20 @@
+=== Q14 STEP 1: clean and first make ===
+rm -f stats.txt report.txt
+/home/dmh/.local/bin/python3.12 stats.py
+/home/dmh/.local/bin/python3.12 build_report.py
+products:
+10# Data Report
+
+Total: 10
+=== Q14 STEP 2: second make ===
+make: Nothing to be done for 'all'.
+=== Q14 STEP 3: touch data.csv and make ===
+/home/dmh/.local/bin/python3.12 stats.py
+/home/dmh/.local/bin/python3.12 build_report.py
+=== Q14 STEP 4: dependency timestamps ===
+2026-09-04 00:00:39.504566902 -0700 data.csv
+2026-09-04 00:00:39.516566874 -0700 stats.txt
+2026-09-04 00:00:39.524566855 -0700 report.txt
+=== Q14 STEP 5: clean only generated files ===
+rm -f stats.txt report.txt
+q14_incremental_build=passed
